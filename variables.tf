@@ -53,13 +53,13 @@ EOT
     resource_group_name               = string
     storage_account_type              = string
     os_type                           = optional(string)
-    performance_plus_enabled          = optional(bool, false)
-    public_network_access_enabled     = optional(bool, true)
+    performance_plus_enabled          = optional(bool) # Default: false
+    public_network_access_enabled     = optional(bool) # Default: true
     secure_vm_disk_encryption_set_id  = optional(string)
     security_type                     = optional(string)
     storage_account_id                = optional(string)
     source_uri                        = optional(string)
-    optimized_frequent_attach_enabled = optional(bool, false)
+    optimized_frequent_attach_enabled = optional(bool) # Default: false
     tags                              = optional(map(string))
     tier                              = optional(string)
     trusted_launch_enabled            = optional(bool)
@@ -79,7 +79,7 @@ EOT
     disk_iops_read_only               = optional(number)
     disk_encryption_set_id            = optional(string)
     disk_access_id                    = optional(string)
-    network_access_policy             = optional(string, "AllowAll")
+    network_access_policy             = optional(string) # Default: "AllowAll"
     zone                              = optional(string)
     encryption_settings = optional(object({
       disk_encryption_key = object({
