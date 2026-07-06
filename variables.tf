@@ -92,5 +92,139 @@ EOT
       }))
     }))
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.managed_disks : (
+        v.edge_zone == null || (length(v.edge_zone) > 0)
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.managed_disks : (
+        v.upload_size_bytes == null || (v.upload_size_bytes >= 1)
+      )
+    ])
+    error_message = "must be at least 1"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.managed_disks : (
+        v.disk_iops_read_write == null || (v.disk_iops_read_write >= 1)
+      )
+    ])
+    error_message = "must be at least 1"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.managed_disks : (
+        v.disk_mbps_read_write == null || (v.disk_mbps_read_write >= 1)
+      )
+    ])
+    error_message = "must be at least 1"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.managed_disks : (
+        v.disk_iops_read_only == null || (v.disk_iops_read_only >= 1)
+      )
+    ])
+    error_message = "must be at least 1"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.managed_disks : (
+        v.disk_mbps_read_only == null || (v.disk_mbps_read_only >= 1)
+      )
+    ])
+    error_message = "must be at least 1"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.managed_disks : (
+        v.max_shares == null || (v.max_shares >= 2 && v.max_shares <= 10)
+      )
+    ])
+    error_message = "must be between 2 and 10"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.managed_disks : (
+        v.zone == null || (length(v.zone) > 0)
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  # --- Unconfirmed validation candidates, derived from azurerm_managed_disk's provider source ---
+  # Not auto-enabled: either a bespoke provider validator we can't safely translate,
+  # or a path that crosses a list-typed block (needs its own for_each wrapping).
+  # Review, translate into a real validation{} block above, and delete once confirmed.
+  # path: location
+  #   source:    location.EnhancedValidate: no recognizable `if ... { errors = append(...) }` pattern - read it by hand
+  # path: resource_group_name
+  #   condition: length(value) <= 90
+  #   message:   [from resourcegroups.ValidateName: invalid when len(value) > 90]
+  #   source:    [from resourcegroups.ValidateName: invalid when len(value) > 90]
+  # path: resource_group_name
+  #   condition: !endswith(value, ".")
+  #   message:   [from resourcegroups.ValidateName: must not end with "."]
+  #   source:    [from resourcegroups.ValidateName: must not end with "."]
+  # path: resource_group_name
+  #   condition: length(value) != 0
+  #   message:   [from resourcegroups.ValidateName: invalid when len(value) == 0]
+  #   source:    [from resourcegroups.ValidateName: invalid when len(value) == 0]
+  # path: resource_group_name
+  #   source:    [from resourcegroups.ValidateName] !matched
+  # path: storage_account_type
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: create_option
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: logical_sector_size
+  #   source:    validation.IntInSlice(...) - no translation rule yet, add one
+  # path: storage_account_id
+  #   source:    [from commonids.ValidateStorageAccountID] !ok
+  # path: storage_account_id
+  #   source:    [from commonids.ValidateStorageAccountID] err != nil
+  # path: gallery_image_reference_id
+  #   source:    [from validate.SharedImageVersionID] !ok
+  # path: gallery_image_reference_id
+  #   source:    [from validate.SharedImageVersionID] err != nil
+  # path: os_type
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: disk_size_gb
+  #   source:    [from validate.ManagedDiskSizeGB] value < 0 || value > 65536
+  # path: disk_encryption_set_id
+  #   source:    [from validate.DiskEncryptionSetID] !ok
+  # path: disk_encryption_set_id
+  #   source:    [from validate.DiskEncryptionSetID] err != nil
+  # path: network_access_policy
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: disk_access_id
+  #   source:    [from diskaccesses.ValidateDiskAccessID] !ok
+  # path: disk_access_id
+  #   source:    [from diskaccesses.ValidateDiskAccessID] err != nil
+  # path: secure_vm_disk_encryption_set_id
+  #   source:    [from validate.DiskEncryptionSetID] !ok
+  # path: secure_vm_disk_encryption_set_id
+  #   source:    [from validate.DiskEncryptionSetID] err != nil
+  # path: security_type
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: hyper_v_generation
+  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: tags
+  #   condition: length(value) <= 50
+  #   message:   [from tags.Validate: invalid when len(value) > 50]
+  #   source:    [from tags.Validate: invalid when len(value) > 50]
+  # path: tags
+  #   condition: length(value) <= 512
+  #   message:   [from tags.Validate: invalid when len(value) > 512]
+  #   source:    [from tags.Validate: invalid when len(value) > 512]
+  # path: tags
+  #   source:    [from tags.Validate] err != nil
+  # path: tags
+  #   condition: length(value) <= 256
+  #   message:   [from tags.Validate: invalid when len(value) > 256]
+  #   source:    [from tags.Validate: invalid when len(value) > 256]
 }
 
