@@ -1,3 +1,7 @@
+output "managed_disks_id" {
+  description = "Map of id values across all managed_disks, keyed the same as var.managed_disks"
+  value       = { for k, v in azurerm_managed_disk.managed_disks : k => v.id }
+}
 output "managed_disks_create_option" {
   description = "Map of create_option values across all managed_disks, keyed the same as var.managed_disks"
   value       = { for k, v in azurerm_managed_disk.managed_disks : k => v.create_option }
