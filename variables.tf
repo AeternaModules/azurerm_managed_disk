@@ -53,13 +53,13 @@ EOT
     resource_group_name               = string
     storage_account_type              = string
     os_type                           = optional(string)
-    performance_plus_enabled          = optional(bool) # Default: false
-    public_network_access_enabled     = optional(bool) # Default: true
+    performance_plus_enabled          = optional(bool)
+    public_network_access_enabled     = optional(bool)
     secure_vm_disk_encryption_set_id  = optional(string)
     security_type                     = optional(string)
     storage_account_id                = optional(string)
     source_uri                        = optional(string)
-    optimized_frequent_attach_enabled = optional(bool) # Default: false
+    optimized_frequent_attach_enabled = optional(bool)
     tags                              = optional(map(string))
     tier                              = optional(string)
     trusted_launch_enabled            = optional(bool)
@@ -79,7 +79,7 @@ EOT
     disk_iops_read_only               = optional(number)
     disk_encryption_set_id            = optional(string)
     disk_access_id                    = optional(string)
-    network_access_policy             = optional(string) # Default: "AllowAll"
+    network_access_policy             = optional(string)
     zone                              = optional(string)
     encryption_settings = optional(object({
       disk_encryption_key = object({
@@ -92,70 +92,6 @@ EOT
       }))
     }))
   }))
-  validation {
-    condition = alltrue([
-      for k, v in var.managed_disks : (
-        v.edge_zone == null || (length(v.edge_zone) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.managed_disks : (
-        v.upload_size_bytes == null || (v.upload_size_bytes >= 1)
-      )
-    ])
-    error_message = "must be at least 1"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.managed_disks : (
-        v.disk_iops_read_write == null || (v.disk_iops_read_write >= 1)
-      )
-    ])
-    error_message = "must be at least 1"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.managed_disks : (
-        v.disk_mbps_read_write == null || (v.disk_mbps_read_write >= 1)
-      )
-    ])
-    error_message = "must be at least 1"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.managed_disks : (
-        v.disk_iops_read_only == null || (v.disk_iops_read_only >= 1)
-      )
-    ])
-    error_message = "must be at least 1"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.managed_disks : (
-        v.disk_mbps_read_only == null || (v.disk_mbps_read_only >= 1)
-      )
-    ])
-    error_message = "must be at least 1"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.managed_disks : (
-        v.max_shares == null || (v.max_shares >= 2 && v.max_shares <= 10)
-      )
-    ])
-    error_message = "must be between 2 and 10"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.managed_disks : (
-        v.zone == null || (length(v.zone) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
   # --- Unconfirmed validation candidates, derived from azurerm_managed_disk's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
   # or a path that crosses a list-typed block (needs its own for_each wrapping).
@@ -180,6 +116,9 @@ EOT
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
   # path: create_option
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: edge_zone
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: logical_sector_size
   #   source:    validation.IntInSlice(...) - no translation rule yet, add one
   # path: storage_account_id
@@ -194,6 +133,21 @@ EOT
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
   # path: disk_size_gb
   #   source:    [from validate.ManagedDiskSizeGB] value < 0 || value > 65536
+  # path: upload_size_bytes
+  #   condition: value >= 1
+  #   message:   must be at least 1
+  # path: disk_iops_read_write
+  #   condition: value >= 1
+  #   message:   must be at least 1
+  # path: disk_mbps_read_write
+  #   condition: value >= 1
+  #   message:   must be at least 1
+  # path: disk_iops_read_only
+  #   condition: value >= 1
+  #   message:   must be at least 1
+  # path: disk_mbps_read_only
+  #   condition: value >= 1
+  #   message:   must be at least 1
   # path: disk_encryption_set_id
   #   source:    [from validate.DiskEncryptionSetID] !ok
   # path: disk_encryption_set_id
@@ -204,6 +158,9 @@ EOT
   #   source:    [from diskaccesses.ValidateDiskAccessID] !ok
   # path: disk_access_id
   #   source:    [from diskaccesses.ValidateDiskAccessID] err != nil
+  # path: max_shares
+  #   condition: value >= 2 && value <= 10
+  #   message:   must be between 2 and 10
   # path: secure_vm_disk_encryption_set_id
   #   source:    [from validate.DiskEncryptionSetID] !ok
   # path: secure_vm_disk_encryption_set_id
@@ -212,6 +169,9 @@ EOT
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
   # path: hyper_v_generation
   #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  # path: zone
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: tags
   #   condition: length(value) <= 50
   #   message:   [from tags.Validate: invalid when len(value) > 50]
