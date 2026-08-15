@@ -40,7 +40,7 @@ output "managed_disks_edge_zone" {
 }
 output "managed_disks_encryption_settings" {
   description = "Map of encryption_settings values across all managed_disks, keyed the same as var.managed_disks"
-  value       = { for k, v in azurerm_managed_disk.managed_disks : k => v.encryption_settings if v.encryption_settings != null && length(v.encryption_settings) > 0 }
+  value       = { for k, v in azurerm_managed_disk.managed_disks : k => one(v.encryption_settings) if v.encryption_settings != null && length(v.encryption_settings) > 0 }
 }
 output "managed_disks_gallery_image_reference_id" {
   description = "Map of gallery_image_reference_id values across all managed_disks, keyed the same as var.managed_disks"
